@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Network Analyzer Pro</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- vis.js Library -->
+    <link href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon">🎉</div>
+            <h3 id="modal-title" class="modal-title">Success!</h3>
+            <p id="modal-message" class="modal-message">Operation completed successfully.</p>
+            <button onclick="closeModal()" class="btn-primary w-full">Got It!</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-badge">🚀 v2.0</div>
+            <h1>Network Analyzer Pro</h1>
+            <p class="header-subtitle">Parse • Visualize • Validate • Simulate</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Upload Card -->
+                <div class="card card-upload">
+                    <div class="card-header">
+                        <span class="card-icon">📁</span>
+                        <h3>Load Configs</h3>
+                    </div>
+                    <div id="file-list" class="file-list"></div>
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="file-input" multiple class="file-input">
+                        <div class="upload-content">
+                            <span class="upload-icon">📤</span>
+                            <p>Drop files here or click to browse</p>
+                            <span class="upload-hint">Supports .dump, .txt, .cfg</span>
+                        </div>
+                    </div>
+                    <div class="sample-buttons">
+                        <button onclick="loadSample('error')" class="btn-sample btn-error">
+                            <span>⚠️</span> Load Error Sample
+                        </button>
+                        <button onclick="loadSample('clean')" class="btn-sample btn-clean">
+                            <span>✅</span> Load Clean Sample
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analyze Card -->
+                <div class="card card-analyze">
+                    <div class="card-header">
+                        <span class="card-icon">⚡</span>
+                        <h3>Analyze</h3>
+                    </div>
+                    <button onclick="analyzeNetwork()" id="analyze-btn" class="btn-analyze">
+                        <span class="btn-icon">🚀</span>
+                        Analyze Network
+                    </button>
+                    <div id="loading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Analyzing configurations...</p>
+                    </div>
+                    <div class="shortcut-hint">Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to analyze</div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="card card-stats">
+                    <div class="card-header">
+                        <span class="card-icon">📊</span>
+                        <h3>Statistics</h3>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-devices">0</div>
+                            <div class="stat-label">Devices</div>
+                            <div class="stat-icon">🖥️</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-links">0</div>
+                            <div class="stat-label">Links</div>
+                            <div class="stat-icon">🔗</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-errors">0</div>
+                            <div class="stat-label">Errors</div>
+                            <div class="stat-icon">❌</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="stat-warnings">0</div>
+                            <div class="stat-label">Warnings</div>
+                            <div class="stat-icon">⚠️</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="card card-content">
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="topology" onclick="switchTab('topology')">
+                            <span>🌐</span> Topology
+                        </button>
+                        <button class="tab-btn" data-tab="validation" onclick="switchTab('validation')">
+                            <span>✅</span> Validation
+                        </button>
+                        <button class="tab-btn" data-tab="simulation" onclick="switchTab('simulation')">
+                            <span>🔄</span> Simulation
+                        </button>
+                        <button class="tab-btn" data-tab="devices" onclick="switchTab('devices')">
+                            <span>📋</span> Devices
+                        </button>
+                        <button class="tab-btn" data-tab="compare" onclick="switchTab('compare')">
+                            <span>🔍</span> Compare
+                        </button>
+                        <button class="tab-btn" data-tab="vlan" onclick="switchTab('vlan')">
+                            <span>🏷️</span> VLANs
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div id="tab-content">
+                        <!-- Initial Message -->
+                        <div id="initial-msg" class="initial-message">
+                            <div class="initial-icon">✨</div>
+                            <h3>Ready to Analyze</h3>
+                            <p>Load configuration files and click <strong>Analyze Network</strong> to get started</p>
+                            <div class="initial-steps">
+                                <span>1️⃣ Load configs</span>
+                                <span>2️⃣ Click Analyze</span>
+                                <span>3️⃣ Explore results</span>
+                            </div>
+                        </div>
+
+                        <!-- Topology Tab -->
+                        <div id="topology-tab" class="tab-pane hidden">
+                            <div class="topology-header">
+                                <h3>Network Topology</h3>
+                                <div class="topology-controls">
+                                    <div class="search-wrapper">
+                                        <input type="text" id="search-input" placeholder="🔍 Search device..." class="search-input">
+                                        <div id="search-suggestions" class="search-suggestions hidden"></div>
+                                    </div>
+                                    <button onclick="searchDevice()" class="btn-search">Find</button>
+                                    <button onclick="clearSearch()" class="btn-clear">✕</button>
+                                    <button onclick="exportTopology('png')" class="btn-export btn-export-png">📸 PNG</button>
+                                    <button onclick="exportTopology('jpg')" class="btn-export btn-export-jpg">🖼️ JPG</button>
+                                    <button onclick="exportTopology('json')" class="btn-export btn-export-json">📄 JSON</button>
+                                </div>
+                            </div>
+                            <div id="mynetwork" class="network-container"></div>
+                        </div>
+
+                        <!-- Validation Tab -->
+                        <div id="validation-tab" class="tab-pane hidden"></div>
+
+                        <!-- Simulation Tab -->
+                        <div id="simulation-tab" class="tab-pane hidden">
+                            <h3 class="tab-title">Path & Failure Simulation</h3>
+                            <div class="simulation-controls">
+                                <select id="source-node" class="sim-select"></select>
+                                <span class="sim-arrow">→</span>
+                                <select id="dest-node" class="sim-select"></select>
+                                <button onclick="findPath()" class="btn-simulate">Find Path</button>
+                            </div>
+                            <div id="path-results" class="path-results"></div>
+                        </div>
+
+                        <!-- Devices Tab -->
+                        <div id="devices-tab" class="tab-pane hidden"></div>
+
+                        <!-- Compare Tab -->
+                        <div id="compare-tab" class="tab-pane hidden">
+                            <h3 class="tab-title">Config Comparison</h3>
+                            <div class="compare-controls">
+                                <select id="compare-device1" class="compare-select"></select>
+                                <select id="compare-device2" class="compare-select"></select>
+                                <button onclick="compareConfigs()" class="btn-compare">Compare</button>
+                            </div>
+                            <div id="compare-results" class="compare-results"></div>
+                        </div>
+
+                        <!-- VLAN Tab -->
+                        <div id="vlan-tab" class="tab-pane hidden">
+                            <h3 class="tab-title">VLAN Configuration</h3>
+                            <div id="vlan-results" class="vlan-results"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with ❤️ by <strong>Virendra</strong> | © 2026 Network Analyzer Pro</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
